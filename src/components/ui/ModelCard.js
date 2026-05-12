@@ -1,36 +1,87 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function ModelCard({ model }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
-    <article className="bg-background-soft border border-border rounded-2xl overflow-hidden hover:border-primary/50 transition-colors group">
-      <div className="relative h-48 bg-gradient-to-br from-border to-background-soft overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=600&q=80')" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background-soft/80 to-transparent" />
+    <article className="group bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div className="relative h-48 overflow-hidden bg-background-soft">
+        {!imgError ? (
+          <Image
+            src={model.image}
+            alt={`Furgoneta ${model.name}`}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <Placeholder name={model.name} />
+        )}
+
+        {/* Badge tipus */}
+        <span className="absolute top-3 left-3 inline-flex items-center bg-card/95 backdrop-blur-sm border border-border text-xs font-semibold px-2.5 py-1 rounded-full z-10">
+          {model.type}
+        </span>
       </div>
 
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-foreground">{model.name}</h3>
+        <h3 className="font-display text-xl font-semibold leading-tight">
+          {model.name}
+        </h3>
 
-        <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted">
-          <span>👥 {model.seats} places</span>
-          <span>🛏️ {model.beds} llits</span>
-          <span>🚿 {model.bathroom}</span>
-          <span>📍 {model.parking}</span>
-        </div>
+        <p className="mt-2 text-sm text-muted line-clamp-2 leading-relaxed">
+          {model.description}
+        </p>
 
-        <div className="mt-5 flex items-center justify-between">
+        <ul className="mt-4 flex flex-wrap gap-2 text-xs">
+          <Spec icon="👥" label={`${model.seats} places`} />
+          <Spec icon="🛏️" label={`${model.beds} llits`} />
+          {model.bathroom !== "—" && <Spec icon="🚿" label={model.bathroom} />}
+        </ul>
+
+        <div className="mt-5 pt-4 border-t border-border flex items-end justify-between">
           <div>
-            <span className="text-2xl font-bold text-primary">{model.pricePerDay} €</span>
+            <span className="font-display text-2xl font-bold text-primary">
+              {model.pricePerDay} €
+            </span>
             <span className="text-xs text-muted ml-1">/ dia</span>
           </div>
-          <Link href={`/models/${model.slug}`} className="text-sm font-medium text-primary hover:text-primary-hover">
-            Veure més →
+          <Link
+            href={`/models/${model.slug}`}
+            aria-label={`Veure detalls de ${model.name}`}
+            className="text-sm font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group-hover:gap-2"
+          >
+            Detalls
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
       </div>
     </article>
+  );
+}
+
+function Spec({ icon, label }) {
+  return (
+    <li className="inline-flex items-center gap-1 bg-background-soft px-2 py-1 rounded-md text-foreground/80">
+      <span aria-hidden="true">{icon}</span>
+      {label}
+    </li>
+  );
+}
+
+/** Placeholder amb la inicial del model si la imatge no està disponible. */
+function Placeholder({ name }) {
+  const initial = name.charAt(0).toUpperCase();
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+      <span className="font-display text-6xl font-bold text-primary/60">
+        {initial}
+      </span>
+    </div>
   );
 }

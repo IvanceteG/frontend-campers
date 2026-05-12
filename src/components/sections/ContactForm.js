@@ -2,79 +2,231 @@
 
 import { useState } from "react";
 
+const INITIAL_FORM = {
+  name: "",
+  email: "",
+  phone: "",
+  pickupDate: "",
+  returnDate: "",
+  message: "",
+};
+
 export default function ContactForm() {
-  const [form, setForm] = useState({
-    name: "", email: "", phone: "", pickupDate: "", returnDate: "", message: "",
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [status, setStatus] = useState({ type: null, message: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e) {
+  function validate() {
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      return "Omple els camps obligatoris.";
+    }
+    // Validació mínima d'email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      return "L'email no té un format vàlid.";
+    }
+    // Si hi ha dates, validar coherència
+    if (form.pickupDate && form.returnDate) {
+      if (new Date(form.returnDate) < new Date(form.pickupDate)) {
+        return "La data de tornada ha de ser posterior a la de recollida.";
+      }
+    }
+    if (form.pickupDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (new Date(form.pickupDate) < today) {
+        return "La data de recollida no pot ser al passat.";
+      }
+    }
+    return null;
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      setStatus({ type: "error", message: "Omple els camps obligatoris." });
+    const errorMsg = validate();
+    if (errorMsg) {
+      setStatus({ type: "error", message: errorMsg });
       return;
     }
-    console.log("Contact form data:", form);
-    setStatus({ type: "success", message: "Sol·licitud enviada! Et contactarem aviat." });
-    setForm({ name: "", email: "", phone: "", pickupDate: "", returnDate: "", message: "" });
+
+    setSubmitting(true);
+    try {
+      // TODO: quan el backend estigui llest, fer POST a /api/contact-requests
+      await new Promise((r) => setTimeout(r, 600));
+      setStatus({
+        type: "success",
+        message: "Sol·licitud enviada! Et contactarem aviat.",
+      });
+      setForm(INITIAL_FORM);
+    } catch {
+      setStatus({
+        type: "error",
+        message: "Hi ha hagut un error. Torna-ho a provar.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
+  const today = new Date().toISOString().split("T")[0];
+
   return (
-    <section id="contacte" className="py-24 bg-background">
-      <div className="max-w-3xl mx-auto px-6">
-        <div className="text-center mb-10">
-          <span className="text-primary text-sm font-semibold uppercase tracking-wider">Contacta</span>
-          <h2 className="mt-2 text-3xl md:text-4xl font-bold">Reserva la teva furgoneta</h2>
-          <p className="mt-3 text-muted">Omple el formulari i et respondrem aviat.</p>
+    <section
+      id="contacte"
+      className="relative py-24 bg-background-soft overflow-hidden"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl"
+      />
+
+      <div className="relative max-w-3xl mx-auto px-6">
+        <div className="text-center mb-12">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+            <span aria-hidden="true">✦</span> Contacta
+          </span>
+          <h2 className="mt-3 font-display text-4xl md:text-5xl font-semibold leading-tight">
+            Comencem a planejar el <span className="italic text-primary">teu viatge</span>.
+          </h2>
+          <p className="mt-4 text-muted">
+            Omple el formulari i et respondrem en menys de 24 hores.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-background-soft border border-border rounded-2xl p-8 space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="bg-card border border-border rounded-3xl p-6 md:p-10 space-y-5 shadow-lg"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Field label="Nom *" name="name" value={form.name} onChange={handleChange} placeholder="El teu nom complet" />
-            <Field label="Correu electrònic *" name="email" type="email" value={form.email} onChange={handleChange} placeholder="exemple@correu.com" />
+            <Field
+              label="Nom"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="El teu nom complet"
+              required
+            />
+            <Field
+              label="Correu electrònic"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="exemple@correu.com"
+              required
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Field label="Telèfon" name="phone" value={form.phone} onChange={handleChange} placeholder="600 000 000" />
-            <Field label="Data de recollida" name="pickupDate" type="date" value={form.pickupDate} onChange={handleChange} />
-            <Field label="Data de tornada" name="returnDate" type="date" value={form.returnDate} onChange={handleChange} />
+            <Field
+              label="Telèfon"
+              name="phone"
+              type="tel"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="600 000 000"
+            />
+            <Field
+              label="Data de recollida"
+              name="pickupDate"
+              type="date"
+              value={form.pickupDate}
+              onChange={handleChange}
+              min={today}
+            />
+            <Field
+              label="Data de tornada"
+              name="returnDate"
+              type="date"
+              value={form.returnDate}
+              onChange={handleChange}
+              min={form.pickupDate || today}
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Missatge *</label>
+            <label
+              htmlFor="message"
+              className="block text-sm font-semibold text-foreground mb-2"
+            >
+              Missatge <span className="text-primary">*</span>
+            </label>
             <textarea
-              name="message" value={form.message} onChange={handleChange} rows={4}
-              placeholder="Explica què necessites..."
-              className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors resize-none"
+              id="message"
+              name="message"
+              value={form.message}
+              onChange={handleChange}
+              rows={4}
+              required
+              placeholder="Explica'ns quan vols viatjar, on i quantes persones sou..."
+              className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
             />
           </div>
 
           {status.type && (
-            <p className={`text-sm ${status.type === "error" ? "text-red-400" : "text-primary"}`}>
+            <p
+              role="status"
+              aria-live="polite"
+              className={`text-sm font-medium px-4 py-3 rounded-lg ${
+                status.type === "error"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-accent/15 text-accent"
+              }`}
+            >
               {status.message}
             </p>
           )}
 
-          <button type="submit" className="w-full bg-primary hover:bg-primary-hover text-background font-semibold py-3 rounded-lg transition-colors">
-            Comprova disponibilitat
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-foreground hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed text-card font-semibold py-3.5 rounded-full transition-colors inline-flex items-center justify-center gap-2"
+          >
+            {submitting ? "Enviant..." : "Comprova disponibilitat"}
+            {!submitting && <span aria-hidden="true">→</span>}
           </button>
+
+          <p className="text-xs text-muted text-center">
+            En enviar acceptes la nostra política de privacitat.
+          </p>
         </form>
       </div>
     </section>
   );
 }
 
-function Field({ label, name, type = "text", value, onChange, placeholder }) {
+function Field({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  min,
+}) {
   return (
     <div>
-      <label className="block text-sm font-medium text-foreground mb-2">{label}</label>
+      <label
+        htmlFor={name}
+        className="block text-sm font-semibold text-foreground mb-2"
+      >
+        {label} {required && <span className="text-primary">*</span>}
+      </label>
       <input
-        type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
-        className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
+        id={name}
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        min={min}
+        className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
       />
     </div>
   );

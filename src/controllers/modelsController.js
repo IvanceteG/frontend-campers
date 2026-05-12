@@ -4,6 +4,11 @@ import {
   getFeaturedModels,
 } from "@/services/modelsService";
 
+/**
+ * Controllers: orquestren la lògica i normalitzen la resposta
+ * a un format { ok, data, error } per a les vistes.
+ */
+
 export async function listModels() {
   try {
     const models = await getAllModels();
@@ -25,7 +30,7 @@ export async function showModel(slug) {
   }
 }
 
-export async function listFeatured(limit) {
+export async function listFeatured(limit = 4) {
   try {
     const models = await getFeaturedModels(limit);
     return { ok: true, data: models };

@@ -1,48 +1,137 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import CamperIllustration from "@/components/ui/CamperIllustration";
 
 export default function Hero() {
-  return (
-    <section id="inici" className="relative min-h-screen flex items-center overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?auto=format&fit=crop&w=1920&q=80')" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-      </div>
+  const [imgError, setImgError] = useState(false);
 
-      <div className="max-w-7xl mx-auto px-6 pt-32 pb-20 w-full">
-        <div className="max-w-2xl">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-            La teva aventura
+  return (
+    <section
+      id="inici"
+      className="relative pt-32 md:pt-36 pb-20 overflow-hidden bg-grain"
+    >
+      {/* Forma orgànica decorativa al fons */}
+      <div
+        aria-hidden="true"
+        className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full bg-primary/10 dark:bg-primary/20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute bottom-0 -left-20 w-[320px] h-[320px] rounded-full bg-accent/15 dark:bg-accent/20 blur-3xl"
+      />
+
+      <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+        {/* Columna text */}
+        <div className="animate-fadeUp">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border text-xs font-medium text-muted">
+            <span
+              aria-hidden="true"
+              className="w-1.5 h-1.5 rounded-full bg-accent"
+            />
+            Disponibilitat oberta · Temporada 2026
+          </span>
+
+          <h1 className="mt-6 font-display text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05]">
+            Viatja
             <br />
-            <span className="text-primary">comença aquí</span>
+            <span className="italic text-primary">a la teva manera</span>.
           </h1>
 
-          <p className="mt-6 text-lg text-muted max-w-lg">
-            Furgonetes camper totalment equipades per viure experiències inoblidables arreu del territori.
+          <p className="mt-6 text-lg text-muted max-w-md leading-relaxed">
+            Furgonetes camper totalment equipades per descobrir cales amagades,
+            valls remotes i nits sota les estrelles.
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link href="#models" className="bg-primary hover:bg-primary-hover text-background font-semibold px-6 py-3.5 rounded-lg transition-colors inline-flex items-center gap-2">
-              Descobreix els models →
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link
+              href="#models"
+              className="bg-foreground hover:bg-primary text-card font-semibold px-6 py-3.5 rounded-full transition-colors inline-flex items-center gap-2"
+            >
+              Explora els models
+              <span aria-hidden="true">→</span>
             </Link>
-            <button type="button" className="border border-border hover:border-primary text-foreground font-semibold px-6 py-3.5 rounded-lg transition-colors">
-              ▶ Veure vídeo
-            </button>
+            <Link
+              href="#contacte"
+              className="border-2 border-foreground/15 hover:border-primary text-foreground font-semibold px-6 py-3.5 rounded-full transition-colors"
+            >
+              Demana pressupost
+            </Link>
           </div>
 
-          <div className="mt-12 flex items-center gap-3 text-sm">
-            <span className="text-foreground font-medium">Excel·lent</span>
-            <div className="flex gap-0.5 text-primary">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              ))}
+          {/* Mètriques */}
+          <dl className="mt-14 grid grid-cols-3 gap-6 max-w-md">
+            <div>
+              <dt className="text-xs text-muted uppercase tracking-wider">
+                Models
+              </dt>
+              <dd className="font-display text-3xl font-semibold mt-1">+20</dd>
             </div>
-            <span className="text-muted">4.8/5 a Trustpilot</span>
+            <div>
+              <dt className="text-xs text-muted uppercase tracking-wider">
+                Viatgers
+              </dt>
+              <dd className="font-display text-3xl font-semibold mt-1">3.5k</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted uppercase tracking-wider">
+                Valoració
+              </dt>
+              <dd className="font-display text-3xl font-semibold mt-1">
+                4.8<span className="text-base text-muted">/5</span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* Columna imatge amb formes */}
+        <div className="relative h-[460px] md:h-[560px] animate-fadeUp">
+          <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden shadow-2xl bg-foreground">
+            {!imgError ? (
+              <Image
+                src="/models/hero.jpg"
+                alt="Furgoneta camper en un paisatge al capvespre"
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <CamperIllustration
+                className="w-full h-full"
+                ariaLabel="Il·lustració d'una furgoneta camper al capvespre"
+              />
+            )}
+          </div>
+
+          {/* Segell circular flotant */}
+          <div
+            aria-hidden="true"
+            className="absolute -top-6 -left-6 w-32 h-32 md:w-36 md:h-36 rounded-full bg-primary text-card flex items-center justify-center font-display text-center rotate-[-12deg] shadow-xl"
+          >
+            <div className="text-xs leading-tight">
+              <div className="text-2xl font-bold">-15%</div>
+              <div className="mt-1">primera reserva</div>
+            </div>
+          </div>
+
+          {/* Targeta inferior amb info */}
+          <div className="absolute -bottom-4 right-4 md:bottom-6 md:right-6 bg-card border border-border rounded-2xl p-4 shadow-lg max-w-[220px]">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span
+                aria-hidden="true"
+                className="w-2 h-2 rounded-full bg-accent animate-pulse"
+              />
+              <span className="text-xs font-medium text-muted">
+                Disponible avui
+              </span>
+            </div>
+            <p className="text-sm font-semibold">
+              Recollida flexible a Barcelona, València i Girona
+            </p>
           </div>
         </div>
       </div>
